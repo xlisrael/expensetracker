@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Budget Tracker - Take Control of Your Finances</title>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Landing page specific styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .landing-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .landing-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .landing-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .landing-hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .landing-hero p {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            padding: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .feature-card .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .testimonials {
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .testimonials h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .testimonial {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+        }
+
+        .testimonial p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .testimonial-author img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Modal for Google Login */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .login-card p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .close-modal {
+            margin-top: 20px;
+            color: #999;
+            cursor: pointer;
+        }
+
+        /* Google Button Container */
+        #googleButtonContainer {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .landing-nav {
+                padding: 20px;
+            }
+            
+            .landing-hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                padding: 30px;
+            }
+            
+            .testimonial-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-page">
+        <!-- Navigation -->
+        <nav class="landing-nav">
+            <div class="logo">
+                <span>🎓</span> Student Budget Tracker
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="landing-hero">
+            <h1>Take Control of Your Student Finances</h1>
+            <p>Track expenses, set budgets, and save money effortlessly. Join thousands of students managing their money smarter.</p>
+            <button class="cta-button" onclick="showLoginModal()">🚀 Start Tracking Now</button>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="feature-card">
+                <div class="emoji">💰</div>
+                <h3>Track Expenses</h3>
+                <p>Log your daily spending on food, transport, entertainment, and more with just a few clicks.</p>
+            </div>
+            <div class="feature-card">
+                <div class="emoji">🎯</div>
+                <h3>Set Budgets</h3>
+                <p>Create daily and weekly spending limits. Get alerts when you're about to exceed them.</p>
+            </div>
+            <div class="feature-card">
+                <div class="emoji">📊</div>
+                <h3>Visual Insights</h3>
+                <p>See where your money goes with beautiful charts and track your spending trends over time.</p>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials">
+            <h2>What Students Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial">
+                    <p>"This app helped me save $200/month! The budget alerts really keep me in check."</p>
+                    <div class="testimonial-author">
+                        <img src="https://ui-avatars.com/api/?name=Alex+Johnson&background=667eea&color=fff" alt="Student">
+                        <div>
+                            <strong>Alex Johnson</strong>
+                            <div>University of Toronto</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <p>"Finally an app that understands student life. The charts show exactly where I overspend."</p>
+                    <div class="testimonial-author">
+                        <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=764ba2&color=fff" alt="Student">
+                        <div>
+                            <strong>Sarah Chen</strong>
+                            <div>NYU</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Modal -->
+        <div class="login-modal" id="loginModal">
+            <div class="login-card">
+                <h2>Welcome Back! 👋</h2>
+                <p>Sign in with your Google account to continue</p>
+                
+                <!-- Google Sign-In Button Container -->
+                <div id="googleButtonContainer"></div>
+                
+                <div class="close-modal" onclick="hideLoginModal()">Maybe later</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>© 2024 Student Budget Tracker. Made with 🎓 for students</p>
+        </footer>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this with your actual Google Client ID
+        const GOOGLE_CLIENT_ID = '242041825987-eteooq5b6tc76bauvk6d9krq9vo59pp5.apps.googleusercontent.com'; // You'll get this from Google Cloud Console
+
+        // Modal functions
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+            initializeGoogleSignIn();
+        }
+
+        function hideLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        // Initialize Google Sign-In
+        function initializeGoogleSignIn() {
+            if (typeof google === 'undefined' || !google.accounts) {
+                console.error('Google Identity Services not loaded');
+                return;
+            }
+
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleResponse,
+                auto_select: false,
+                cancel_on_tap_outside: false
+            });
+
+            // Render the Google button
+            google.accounts.id.renderButton(
+                document.getElementById('googleButtonContainer'),
+                { 
+                    theme: 'outline', 
+                    size: 'large',
+                    width: 250,
+                    text: 'signin_with',
+                    shape: 'rectangular',
+                    logo_alignment: 'center'
+                }
+            );
+        }
+
+        // Handle Google's response
+        function handleGoogleResponse(response) {
+            console.log('Google response received');
+            
+            // Decode the JWT token to get user info
+            const userInfo = parseJwt(response.credential);
+            
+            if (userInfo) {
+                // Store user info in localStorage
+                const user = {
+                    name: userInfo.name,
+                    email: userInfo.email,
+                    picture: userInfo.picture,
+                    sub: userInfo.sub
+                };
+                
+                localStorage.setItem('google_token', response.credential);
+                localStorage.setItem('google_user', JSON.stringify(user));
+                
+                console.log('User logged in:', user.email);
+                
+                // Redirect to main app
+                window.location.href = 'main.html';
+            }
+        }
+
+        // Parse JWT token
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error('Error parsing JWT:', e);
+                return null;
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                hideLoginModal();
+            }
+        }
+
+        // Check if already logged in (redirect to main)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('google_user')) {
+                window.location.href = 'main.html';
+            }
+        });
+    </script>
+</body>
+</html>

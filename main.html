@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Budget Tracker Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Budget Tracker Pro</h1>
+        <br>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 15px; float: right; margin-top: -50px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px;">
+            <img id="userAvatar" src="" alt="Profile" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white; display: none; object-fit: cover;">
+            <span id="welcomeMessage" style="color: white; font-weight: 500;"></span>
+            <button onclick="logout()" style="background: #ff4757; padding: 6px 15px; font-size: 0.85em; border-radius: 20px;">Logout</button>
+        </div>
+        <!-- Currency Selector -->
+        <div class="currency-selector">
+            <label>Currency:</label>
+            <select id="currencySelect" onchange="changeCurrency()">
+                <option value="NGN">🇳🇬 NGN (₦)</option>
+                <option value="USD">🇺🇸 USD ($)</option>
+                <option value="EUR">🇪🇺 EUR (€)</option>
+                <option value="GBP">🇬🇧 GBP (£)</option>
+                <option value="JPY">🇯🇵 JPY (¥)</option>
+                <option value="CAD">🇨🇦 CAD (C$)</option>
+                <option value="AUD">🇦🇺 AUD (A$)</option>
+                <option value="INR">🇮🇳 INR (₹)</option>
+            </select>
+            <button onclick="resetAllData()" class="reset-btn">🔄 Reset All Data</button>
+        </div>
+
+        <!-- Income Section - Collapsible -->
+        <div class="card">
+            <div class="gridcard">
+                <div id="income" class="card-header" onclick="toggleSection('incomeSection')">
+                    <h2>💰 Income Setup</h2>
+                    <span class="edit-icon" id="incomeEditIcon">✏️</span>
+                </div>
+                <div id="incomeSection" class="card-content">
+                    <div class="input-group1">
+                        <label>Monthly Allowance/Income:</label>
+                        <input class="income-in" type="number" id="monthlyIncome" placeholder="e.g., 500">
+                        <button onclick="setIncome()">Set Income</button>
+                    </div>
+                </div>
+                <div id="incomeDisplay" class="value-display" style="display: none;">
+                    <span class="value-label">Monthly Income:</span>
+                    <span class="value-amount" id="displayIncome">$0</span>
+                </div>
+            </div>
+
+            <div class="gridcard">
+                <!-- style it in such a way that the fields will be arranged vertically -->
+                 
+                <div class="card-header" onclick="toggleSection('limitsSection')">
+                    <h2>🎯 Budget Limits</h2>
+                    <span class="edit-icon" id="limitsEditIcon">✏️</span>
+                </div>
+                <div id="limitsSection" class="card-content">
+                    <div class="limit-controls">
+                        <div>
+                            <label>Daily Limit:</label>
+                            <input type="number" id="dailyLimit" placeholder="20">
+                        </div>
+                        <div>
+                            <label>Weekly Limit:</label>
+                            <input type="number" id="weeklyLimit" placeholder="100">
+                        </div>
+                        <button onclick="setLimits()">Set Limits</button>
+                    </div>
+                </div>
+                <div id="limitsDisplay" class="value-display" style="display: none;">
+                    <span class="value-label">Daily Limit:</span>
+                    <span class="value-amount" id="displayDaily">$0</span>
+                    <span class="value-label">Weekly Limit:</span>
+                    <span class="value-amount" id="displayWeekly">$0</span>
+                </div>
+            </div>
+        
+            <div class="gridcard">
+                <div class="card-header" onclick="toggleSection('savingsSection')">
+                    <h2>🎯 Savings Goals</h2>
+                    <span class="edit-icon" id="savingsEditIcon">✏️</span>
+                </div>
+                <div id="savingsSection" class="card-content">
+                    <div class="savings-form">
+                        <input type="text" id="goalName" placeholder="Goal name (e.g., New Laptop)">
+                        <input type="number" id="goalAmount" placeholder="Target amount">
+                        <input type="date" id="goalDeadline">
+                        <button onclick="addSavingsGoal()">Add Goal</button>
+                    </div>
+                    <div id="savingsGoalsList" class="savings-list"></div>
+                </div>
+            </div>
+        
+            <div class="gridcard">
+                <div class="card-header" onclick="toggleSection('recurringSection')">
+                    <h2>🔄 Recurring Expenses</h2>
+                    <span class="edit-icon" id="recurringEditIcon">✏️</span>
+                </div>
+                <div id="recurringSection" class="card-content">
+                    <div class="recurring-form">
+                        <select id="recurringCategory">
+                            <option value="food">🍔 Food</option>
+                            <option value="transport">🚌 Transport</option>
+                            <option value="entertainment">🎮 Entertainment</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="bills">📄 Bills</option>
+                            <option value="other">📦 Other</option>
+                        </select>
+                        <input type="number" id="recurringAmount" placeholder="Amount">
+                        <select id="recurringFrequency">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <input type="date" id="recurringStartDate">
+                        <button onclick="addRecurringExpense()">Add Recurring</button>
+                    </div>
+                    <div id="recurringList" class="recurring-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Expense -->
+            <div class="expense-form">
+                <h2>➕ Add Expense</h2>
+                <div class="expense-form">
+                    <select id="expenseCategory">
+                        <option value="food">🍔 Food</option>
+                        <option value="transport">🚌 Transport</option>
+                        <option value="entertainment">🎮 Entertainment</option>
+                        <option value="shopping">🛍️ Shopping</option>
+                        <option value="bills">📄 Bills</option>
+                        <option value="other">📦 Other</option>
+                    </select>
+                    <input type="number" id="expenseAmount" placeholder="Amount">
+                    <input type="date" id="expenseDate">
+                    <button onclick="addExpense()">Add Expense</button>
+                </div>
+            </div>
+
+        <!-- Alerts Section -->
+        <div id="alertBox" class="alert" style="display: none;"></div>
+        
+        <!-- Warning Modal -->
+        <div id="warningModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>⚠️ Warning: Limit Exceeded!</h3>
+                <p id="warningMessage"></p>
+                <div class="modal-buttons">
+                    <button onclick="forceAddExpense()" class="force-btn">Force Add Anyway</button>
+                    <button onclick="cancelExpense()" class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-container">
+            <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <!-- Expense List -->
+        <div class="card">
+            <h2>📋 Recent Expenses</h2>
+            <div id="expenseList"></div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Today's Spending</h3>
+                <p id="todayTotal">$0</p>
+            </div>
+            <div class="summary-card">
+                <h3>This Week</h3>
+                <p id="weekTotal">$0</p>
+            </div>
+            <div class="summary-card">
+                <h3>This Month</h3>
+                <p id="monthTotal">$0</p>
+            </div>
+            <div class="summary-card">
+                <h3>Remaining</h3>
+                <p id="remainingBudget">$0</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
