@@ -99,7 +99,7 @@ function initAuth() {
     }
     
     // Check if authenticated
-    if (!isAuthenticated() && !window.location.pathname.includes('landing.html')) {
+    if (!isAuthenticated() && !window.location.pathname.includes('index.html')) {
         window.location.href = 'index.html';
         return false;
     }
