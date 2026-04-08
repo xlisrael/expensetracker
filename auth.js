@@ -44,7 +44,7 @@ function logout() {
     localStorage.removeItem('google_user');
     
     // Redirect to landing page
-    window.location.href = 'landing.html';
+    window.location.href = 'index.html';
 }
 
 // Parse JWT token to get user info
