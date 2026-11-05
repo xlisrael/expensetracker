@@ -3,21 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Track expenses, set budgets, and save money as a student.">
     <title>Student Budget Tracker Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="auth.js"></script>
 </head>
 <body>
+    <nav class="nav">
+        <div class="nav-inner">
+            <span class="nav-title">🎓 Student Budget Tracker</span>
+            <ul>
+                <li><a href="main.html" class="active">🏠 Home</a></li>
+                <li><a href="javascript:void(0)" onclick="openReport()">📊 Report</a></li>
+            </ul>
+            <button class="dark-toggle" id="darkToggle" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
+        </div>
+    </nav>
+
     <div class="container">
         <h1>Student Budget Tracker Pro</h1>
-        <br>
-        <div class="user-profile" style="display: flex; align-items: center; gap: 15px; float: right; margin-top: -50px; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px;">
-            <img id="userAvatar" src="" alt="Profile" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid white; display: none; object-fit: cover;">
-            <span id="welcomeMessage" style="color: white; font-weight: 500;"></span>
-            <button onclick="logout()" style="background: #ff4757; padding: 6px 15px; font-size: 0.85em; border-radius: 20px;">Logout</button>
+
+        <div class="user-profile">
+            <img id="userAvatar" src="" alt="Profile">
+            <span id="welcomeMessage"></span>
+            <button onclick="logout()">Logout</button>
         </div>
+
         <!-- Currency Selector -->
         <div class="currency-selector">
             <label>Currency:</label>
@@ -31,10 +46,13 @@
                 <option value="AUD">🇦🇺 AUD (A$)</option>
                 <option value="INR">🇮🇳 INR (₹)</option>
             </select>
+            <button onclick="exportData()" class="reset-btn">⬇️ Export</button>
+            <button onclick="document.getElementById('importFile').click()" class="reset-btn">⬆️ Import</button>
+            <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importData(event)">
             <button onclick="resetAllData()" class="reset-btn">🔄 Reset All Data</button>
         </div>
 
-        <!-- Income Section - Collapsible -->
+        <!-- Income / Budgets / Goals / Recurring / Category Budgets -->
         <div class="card">
             <div class="gridcard">
                 <div id="income" class="card-header" onclick="toggleSection('incomeSection')">
@@ -55,8 +73,6 @@
             </div>
 
             <div class="gridcard">
-                <!-- style it in such a way that the fields will be arranged vertically -->
-                 
                 <div class="card-header" onclick="toggleSection('limitsSection')">
                     <h2>🎯 Budget Limits</h2>
                     <span class="edit-icon" id="limitsEditIcon">✏️</span>
@@ -81,10 +97,10 @@
                     <span class="value-amount" id="displayWeekly">$0</span>
                 </div>
             </div>
-        
+
             <div class="gridcard">
                 <div class="card-header" onclick="toggleSection('savingsSection')">
-                    <h2>🎯 Savings Goals</h2>
+                    <h2>🐷 Savings Goals</h2>
                     <span class="edit-icon" id="savingsEditIcon">✏️</span>
                 </div>
                 <div id="savingsSection" class="card-content">
@@ -97,7 +113,7 @@
                     <div id="savingsGoalsList" class="savings-list"></div>
                 </div>
             </div>
-        
+
             <div class="gridcard">
                 <div class="card-header" onclick="toggleSection('recurringSection')">
                     <h2>🔄 Recurring Expenses</h2>
@@ -125,31 +141,52 @@
                     <div id="recurringList" class="recurring-list"></div>
                 </div>
             </div>
+
+            <div class="gridcard">
+                <div class="card-header" onclick="toggleSection('categoryBudgetSection')">
+                    <h2>🏷️ Category Budgets</h2>
+                    <span class="edit-icon" id="budgetEditIcon">✏️</span>
+                </div>
+                <div id="categoryBudgetSection" class="card-content">
+                    <div class="recurring-form">
+                        <select id="budgetCategory">
+                            <option value="food">🍔 Food</option>
+                            <option value="transport">🚌 Transport</option>
+                            <option value="entertainment">🎮 Entertainment</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="bills">📄 Bills</option>
+                            <option value="other">📦 Other</option>
+                        </select>
+                        <input type="number" id="budgetAmount" placeholder="Monthly budget amount">
+                        <button onclick="setCategoryBudget()">Set Budget</button>
+                    </div>
+                    <div id="categoryBudgetsList" class="budgets-list"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Add Expense -->
-            <div class="expense-form">
-                <h2>➕ Add Expense</h2>
-                <div class="expense-form">
-                    <select id="expenseCategory">
-                        <option value="food">🍔 Food</option>
-                        <option value="transport">🚌 Transport</option>
-                        <option value="entertainment">🎮 Entertainment</option>
-                        <option value="shopping">🛍️ Shopping</option>
-                        <option value="bills">📄 Bills</option>
-                        <option value="other">📦 Other</option>
-                    </select>
-                    <input type="number" id="expenseAmount" placeholder="Amount">
-                    <input type="date" id="expenseDate">
-                    <button onclick="addExpense()">Add Expense</button>
-                </div>
-            </div>
+        <div class="expense-form">
+            <h2>➕ Add Expense</h2>
+            <select id="expenseCategory">
+                <option value="food">🍔 Food</option>
+                <option value="transport">🚌 Transport</option>
+                <option value="entertainment">🎮 Entertainment</option>
+                <option value="shopping">🛍️ Shopping</option>
+                <option value="bills">📄 Bills</option>
+                <option value="other">📦 Other</option>
+            </select>
+            <input type="number" id="expenseAmount" placeholder="Amount">
+            <input type="date" id="expenseDate">
+            <button onclick="addExpense()">Add Expense</button>
+            <input type="text" id="expenseNote" class="expense-note" placeholder="Note (optional) — e.g. Lunch at cafeteria. Category auto-suggests from history." oninput="suggestCategory()">
+        </div>
 
         <!-- Alerts Section -->
         <div id="alertBox" class="alert" style="display: none;"></div>
-        
+
         <!-- Warning Modal -->
-        <div id="warningModal" class="modal" style="display: none;">
+        <div id="warningModal" class="modal" style="display: none;" onclick="if(event.target===this) cancelExpense()">
             <div class="modal-content">
                 <h3>⚠️ Warning: Limit Exceeded!</h3>
                 <p id="warningMessage"></p>
@@ -169,9 +206,36 @@
             <canvas id="trendChart"></canvas>
         </div>
 
+        <div class="chart-container">
+            <canvas id="incomeExpenseChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="budgetChart"></canvas>
+        </div>
+
         <!-- Expense List -->
-        <div class="card">
+        <div class="recent-expense-header">
             <h2>📋 Recent Expenses</h2>
+            <div class="balance-display">
+                Balance:
+                <span id="currentBalance">$0.00</span>
+            </div>
+            <div class="expense-filters">
+                <input type="text" id="searchInput" placeholder="🔍 Search by note or category..." oninput="updateExpenseList()">
+                <select id="filterCategory" onchange="updateExpenseList()">
+                    <option value="">All Categories</option>
+                    <option value="food">🍔 Food</option>
+                    <option value="transport">🚌 Transport</option>
+                    <option value="entertainment">🎮 Entertainment</option>
+                    <option value="shopping">🛍️ Shopping</option>
+                    <option value="bills">📄 Bills</option>
+                    <option value="other">📦 Other</option>
+                </select>
+                <input type="date" id="filterFrom" onchange="updateExpenseList()">
+                <span class="filter-sep">to</span>
+                <input type="date" id="filterTo" onchange="updateExpenseList()">
+            </div>
             <div id="expenseList"></div>
         </div>
 
@@ -196,6 +260,86 @@
         </div>
     </div>
 
+    <!-- Edit Expense Modal -->
+    <div id="editModal" class="modal" style="display: none;" onclick="if(event.target===this) closeEditModal()">
+        <div class="modal-content">
+            <h3>✏️ Edit Expense</h3>
+            <div class="edit-form">
+                <label>Category</label>
+                <select id="editCategory">
+                    <option value="food">🍔 Food</option>
+                    <option value="transport">🚌 Transport</option>
+                    <option value="entertainment">🎮 Entertainment</option>
+                    <option value="shopping">🛍️ Shopping</option>
+                    <option value="bills">📄 Bills</option>
+                    <option value="other">📦 Other</option>
+                </select>
+                <label>Amount</label>
+                <input type="number" id="editAmount">
+                <label>Date</label>
+                <input type="date" id="editDate">
+                <label>Note</label>
+                <input type="text" id="editNote">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="saveEditedExpense()" class="force-btn">Save</button>
+                <button onclick="closeEditModal()" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contribute to Savings Goal Modal -->
+    <div id="contributeModal" class="modal" style="display: none;" onclick="if(event.target===this) closeContributeModal()">
+        <div class="modal-content">
+            <h3>🐷 Contribute to Savings Goal</h3>
+            <p id="contributeGoalInfo" style="color: var(--card-text);"></p>
+            <div class="edit-form">
+                <label>Amount</label>
+                <input type="number" id="contributeAmount" placeholder="Amount to contribute" min="0.01" step="0.01">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="confirmContribution()" class="force-btn">Add Funds</button>
+                <button onclick="closeContributeModal()" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal" style="display: none;" onclick="if(event.target===this) closeConfirmModal()">
+        <div class="modal-content">
+            <h3 id="confirmTitle">Are you sure?</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="confirmAction()" class="force-btn" id="confirmOkBtn">Confirm</button>
+                <button onclick="closeConfirmModal()" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Report Modal -->
+    <div id="reportModal" class="modal" style="display: none;" onclick="if(event.target===this) closeReportModal()">
+        <div class="modal-content report-modal">
+            <h3>📊 Monthly Report</h3>
+            <div id="reportContent"></div>
+            <div class="modal-buttons">
+                <button onclick="exportReportCSV()" class="force-btn">⬇️ Export CSV</button>
+                <button onclick="closeReportModal()" class="cancel-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function(err) {
+                    console.warn('Service worker registration failed:', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>

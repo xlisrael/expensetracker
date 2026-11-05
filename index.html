@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Student Budget Tracker - Track expenses, set budgets, and save money effortlessly.">
     <title>Student Budget Tracker - Take Control of Your Finances</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png">
     <script src="https://accounts.google.com/gsi/client"></script>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -308,7 +312,11 @@
 
         <!-- Footer -->
         <footer class="footer">
+<<<<<<< HEAD:index.html
             <p>© 2026 Student Budget Tracker</p>
+=======
+            <p>© <span id="currentYear"></span> Student Budget Tracker. Made with 🎓 for students</p>
+>>>>>>> 0508afd (Made sure the oauth works well):landing.html
         </footer>
     </div>
 
@@ -405,10 +413,20 @@
 
         // Check if already logged in (redirect to main)
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
             if (localStorage.getItem('google_user')) {
                 window.location.href = 'main.html';
             }
         });
+
+        // Register service worker for PWA/offline support
+        if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function(err) {
+                    console.warn('Service worker registration failed:', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
